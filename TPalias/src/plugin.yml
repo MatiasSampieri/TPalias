@@ -1,0 +1,6 @@
+name: TPalias
+version: 1.0
+author: kector
+main: com.kector.tpalias.TPalias
+api-version: 1.19
+
