@@ -22,7 +22,7 @@ public class Tpa implements CommandExecutor {
         if (command.getName().equalsIgnoreCase("tpa")) {
 
             if (args.length != 1) {
-                player.sendMessage(ChatColor.RED + "[ERROR en cantidad de argumentos] /tpa <jugador o alias>");
+                player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /tpa <jugador o alias>");
                 return true;
             }
 
@@ -51,7 +51,7 @@ public class Tpa implements CommandExecutor {
             // TODO: hacer esto
 
             // if argument is not a player or alias
-            player.sendMessage(ChatColor.RED + "[ERROR argumento no es jugador o alias] /tpa <jugador o alias>");
+            player.sendMessage(ChatColor.RED + "[ERROR: argumento no es jugador o alias] /tpa <jugador o alias>");
         }
 
 
