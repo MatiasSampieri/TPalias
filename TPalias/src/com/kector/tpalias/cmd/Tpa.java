@@ -1,7 +1,10 @@
 package com.kector.tpalias.cmd;
 
+import com.kector.tpalias.otr.SaveData;
+import com.kector.tpalias.otr.SavesManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,6 +15,14 @@ import java.util.List;
 
 public class Tpa implements CommandExecutor {
 
+    private final SavesManager saveman;
+    private final Server server;
+
+    public Tpa(Server server, SavesManager saveman) {
+        this.server = server;
+        this.saveman = saveman;
+    }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (!(commandSender instanceof Player player)) {
@@ -19,20 +30,20 @@ public class Tpa implements CommandExecutor {
         }
 
         // /tpa
-        if (command.getName().equalsIgnoreCase("tpa")) {
+        if (command.getName().equalsIgnoreCase("t")) {
 
             if (args.length != 1) {
-                player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /tpa <jugador o alias>");
-                return true;
-            }
-
-            // /tpa help
-            if (args[0].equalsIgnoreCase("help")) {
-                player.sendMessage(ChatColor.GOLD + "/tpa <jugador o alias>");
+                player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /t <jugador o alias>");
                 return true;
             }
 
             String argument = args[0];
+
+            // /tpa help
+            if (argument.equalsIgnoreCase("help")) {
+                player.sendMessage(ChatColor.GOLD + "/t <jugador o alias>");
+                return true;
+            }
 
             // check if argument is player
             List<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -47,15 +58,15 @@ public class Tpa implements CommandExecutor {
             }
 
             // check if argument is an alias
+            SaveData savedata = saveman.loadAlias(argument);
+            if (savedata == null) {
+                player.sendMessage(ChatColor.RED + "[ERROR: alias o jugador inexistente] \nusa /list para ver la lista de aliases");
+                return true;
+            }
 
-            // TODO: hacer esto
-
-            // if argument is not a player or alias
-            player.sendMessage(ChatColor.RED + "[ERROR: argumento no es jugador o alias] /tpa <jugador o alias>");
+            player.teleport(savedata.getLocation());
+            player.sendMessage(ChatColor.AQUA + "Tepeado a " + savedata.getName());
         }
-
-
-
 
         return true;
     }

@@ -1,7 +1,10 @@
 package com.kector.tpalias;
 
 import com.kector.tpalias.cmd.Tpa;
+import com.kector.tpalias.otr.SaveData;
+import com.kector.tpalias.otr.SavesManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -10,10 +13,13 @@ public class TPalias extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Tpa tpa = new Tpa();
+        Server server = getServer();
+        SavesManager saveman = new SavesManager(server);
+
+        Tpa tpa = new Tpa(server, saveman);
         Objects.requireNonNull(getCommand("tpa")).setExecutor(tpa);
 
-        getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[TPalias] Enabled!");
+        server.getConsoleSender().sendMessage(ChatColor.AQUA + "[TPalias] Enabled!");
     }
 
     @Override
