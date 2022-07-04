@@ -1,5 +1,6 @@
 package com.kector.tpalias;
 
+import com.kector.tpalias.cmd.Alias;
 import com.kector.tpalias.cmd.Tpa;
 import com.kector.tpalias.otr.SaveData;
 import com.kector.tpalias.otr.SavesManager;
@@ -17,7 +18,10 @@ public class TPalias extends JavaPlugin {
         SavesManager saveman = new SavesManager(server);
 
         Tpa tpa = new Tpa(server, saveman);
-        Objects.requireNonNull(getCommand("tpa")).setExecutor(tpa);
+        Alias alias = new Alias(server, saveman);
+        Objects.requireNonNull(getCommand("t")).setExecutor(tpa);
+        Objects.requireNonNull(getCommand("alias")).setExecutor(alias);
+        Objects.requireNonNull(getCommand("list")).setExecutor(alias);
 
         server.getConsoleSender().sendMessage(ChatColor.AQUA + "[TPalias] Enabled!");
     }

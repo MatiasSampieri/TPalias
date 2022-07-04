@@ -3,4 +3,19 @@ version: 1.0
 author: kector
 main: com.kector.tpalias.TPalias
 api-version: 1.19
+commands:
+  t:
+    description: tepea a jugador o alias
+    usage: /<comando> <jugador o alias>
+    aliases: tpa
+
+  alias:
+    description: guarda la posicion actual con un nombre
+    usage: /<comando> <nombre>
+    aliases: a
+
+  list:
+    description: lista todos los aliases de coordenadas guardados
+    usage: /<comando> <jugador o dimension>
+    aliases: l
 

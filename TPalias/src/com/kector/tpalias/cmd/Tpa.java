@@ -29,7 +29,7 @@ public class Tpa implements CommandExecutor {
             return true;
         }
 
-        // /tpa
+        // /t
         if (command.getName().equalsIgnoreCase("t")) {
 
             if (args.length != 1) {
