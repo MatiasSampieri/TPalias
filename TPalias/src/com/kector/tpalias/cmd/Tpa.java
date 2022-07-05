@@ -51,6 +51,9 @@ public class Tpa implements CommandExecutor {
                 if (onlinePlayer.getDisplayName().equals(argument)) {
                     Player target = Bukkit.getPlayer(argument);
                     assert target != null;
+
+                    saveman.saveQuick(player);
+
                     player.teleport(target.getLocation());
                     player.sendMessage(ChatColor.AQUA + "Tepeado a " + argument);
                     return true;
@@ -64,9 +67,13 @@ public class Tpa implements CommandExecutor {
                 return true;
             }
 
+            saveman.saveQuick(player);
+
             player.teleport(savedata.getLocation());
             player.sendMessage(ChatColor.AQUA + "Tepeado a " + savedata.getName());
         }
+
+
 
         return true;
     }

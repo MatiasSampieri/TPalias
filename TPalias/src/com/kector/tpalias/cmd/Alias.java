@@ -48,22 +48,15 @@ public class Alias implements CommandExecutor {
             }
 
             saveman.saveAlias(new SaveData(argument, player.getLocation(), player));
+            player.sendMessage(ChatColor.AQUA + "Alias " + argument + " creado!");
             return true;
         }
 
 
         // /list
-        if (command.getName().equalsIgnoreCase("list")) {
+        if (command.getName().equalsIgnoreCase("lista")) {
             if (args.length > 1) {
                 player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /list [<jugador o dimension>] ");
-                return true;
-            }
-
-            String argument = args[0];
-
-            // /alias help
-            if (argument.equalsIgnoreCase("help")) {
-                player.sendMessage(ChatColor.GOLD + "/list [<jugador o dimension>]\nDimensiones: world, nether, end");
                 return true;
             }
 
@@ -75,8 +68,17 @@ public class Alias implements CommandExecutor {
                 return true;
             }
 
-            // with dim filter
+            String argument = args[0];
+
+            // /list help
+            if (argument.equalsIgnoreCase("help")) {
+                player.sendMessage(ChatColor.GOLD + "/list [<jugador o dimension>]\nDimensiones: world, nether, end");
+                return true;
+            }
+
             if (Arrays.asList("world", "nether", "end").contains(argument)) {
+                argument = argument.replace("nether", "world_nether");
+                argument = argument.replace("end", "world_end");
                 List<String> aliasList = saveman.getList(server.getWorld(argument));
                 String listStr = makeListStr(aliasList);
                 player.sendMessage(ChatColor.YELLOW + listStr);
@@ -84,7 +86,7 @@ public class Alias implements CommandExecutor {
             }
 
             // with player filter
-            List<String> aliasList = saveman.getList(player);
+            List<String> aliasList = saveman.getList(argument);
             String listStr = makeListStr(aliasList);
             player.sendMessage(ChatColor.YELLOW + listStr);
             return true;

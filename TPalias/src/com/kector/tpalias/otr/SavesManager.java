@@ -18,7 +18,62 @@ public class SavesManager {
     public SavesManager(Server server) {
         this.server = server;
         this.connection = initDB("aliases.db");
+    }
 
+    public Location loadQuick(Player player) {
+        String name = player.getDisplayName();
+        try {
+            Statement statement = connection.createStatement();
+            String sql = String.format("SELECT * FROM QuickSaves WHERE Player = \"%s\"", name);
+            ResultSet res = statement.executeQuery(sql);
+
+            if (!res.next()) {
+                server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al cargar quick save");
+                return null;
+            }
+
+            double x = res.getDouble("X");
+            double y = res.getDouble("Y");
+            double z = res.getDouble("Z");
+            float yaw = res.getFloat("yaw");
+            float pitch = res.getFloat("pitch");
+            String dim = res.getString("Dim");
+
+            res.close();
+            statement.close();
+
+            return new Location(server.getWorld(dim), x, y, z, yaw, pitch);
+
+        } catch (Exception e) {
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al cargar quick save");
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void saveQuick(Player player) {
+        String name = player.getDisplayName();
+        double x = player.getLocation().getX();
+        double y = player.getLocation().getY();
+        double z = player.getLocation().getZ();
+        float yaw = player.getLocation().getYaw();
+        float pitch = player.getLocation().getPitch();
+        String dim = player.getLocation().getWorld().getName();
+
+        try {
+            Statement statement = connection.createStatement();
+            String sql = String.format("INSERT OR REPLACE INTO QuickSaves (Player, X, Y, Z, yaw, pitch, Dim) " +
+                    "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\");", name, x, y, z, yaw, pitch, dim);
+            statement.executeUpdate(sql);
+            statement.close();
+            connection.commit();
+        } catch (Exception e) {
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
+        }
+    }
+
+    public void deleteSave(String name) {
+        // TODO: implementar
     }
 
     public void saveAlias(SaveData data) {
@@ -36,19 +91,23 @@ public class SavesManager {
             String sql = String.format("INSERT INTO Aliases (Name, X, Y, Z, yaw, pitch, Dim, Player) " +
                                        "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\", \"%s\");", name, x, y, z, yaw, pitch, dim, player);
             statement.executeUpdate(sql);
+            statement.close();
             connection.commit();
         } catch (Exception e) {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
         }
     }
 
+    // TODO: fix sql vulnerabilities
+
     public SaveData loadAlias(String name) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM Aliases WHERE Name = \"%s\"", name);
+            String sql = String.format("SELECT * FROM Aliases WHERE Name = \"%s\"", name);
             ResultSet res = statement.executeQuery(sql);
 
             if (!res.next()) {
+                server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al encontrar alias");
                 return null;
             }
 
@@ -60,11 +119,16 @@ public class SavesManager {
             float pitch = res.getFloat("pitch");
             String player = res.getString("Player");
 
+            res.close();
+            statement.close();
+
             Location location = new Location(server.getWorld(dim), x, y, z, yaw, pitch);
 
             return new SaveData(name, location, server.getPlayer(player));
 
         } catch (Exception e) {
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al encontrar alias");
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
             return null;
         }
     }
@@ -81,6 +145,9 @@ public class SavesManager {
                 aliasList.add(res.getString("Name"));
             }
 
+            res.close();
+            statement.close();
+
             return aliasList;
 
         } catch (Exception e) {
@@ -88,10 +155,10 @@ public class SavesManager {
         }
     }
 
-    public List<String> getList(Player player) {
+    public List<String> getList(String player) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM Aliases WHERE Player = \"%s\"", player.getDisplayName());
+            String sql = String.format("SELECT Name FROM Aliases WHERE Player = \"%s\"", player);
             ResultSet res = statement.executeQuery(sql);
 
             List<String> aliasList = new ArrayList<>();
@@ -99,6 +166,9 @@ public class SavesManager {
             while (res.next()) {
                 aliasList.add(res.getString("Name"));
             }
+
+            res.close();
+            statement.close();
 
             return aliasList;
 
@@ -119,6 +189,9 @@ public class SavesManager {
                 aliasList.add(res.getString("Name"));
             }
 
+            res.close();
+            statement.close();
+
             return aliasList;
 
         } catch (Exception e) {
@@ -126,11 +199,20 @@ public class SavesManager {
         }
     }
 
+    public void closeConnection() {
+        try {
+            connection.commit();
+            connection.close();
+        } catch (Exception e) {
+
+        }
+    }
 
     private Connection initDB(String name) {
         try {
             Class.forName("org.sqlite.JDBC");
             Connection con = DriverManager.getConnection("jdbc:sqlite:" + name);
+            con.setAutoCommit(false);
             server.getConsoleSender().sendMessage(ChatColor.GREEN + "[TPalias] DB abierta!");
 
             // Create tables
@@ -161,6 +243,7 @@ public class SavesManager {
 
             statement.executeUpdate(sql);
             statement.close();
+            con.commit();
             return con;
 
         } catch ( Exception e ) {

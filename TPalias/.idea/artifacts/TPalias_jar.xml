@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="TPalias:jar">
-    <output-path>$PROJECT_DIR$/..</output-path>
+    <output-path>$PROJECT_DIR$/../../../GAMES/SERVER1.19/plugins</output-path>
     <root id="archive" name="TPalias.jar">
       <element id="module-output" name="TPalias" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../Dependecies/spigot-api-1.19.jar" path-in-jar="/" />
