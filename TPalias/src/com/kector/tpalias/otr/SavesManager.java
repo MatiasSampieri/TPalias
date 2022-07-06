@@ -73,7 +73,15 @@ public class SavesManager {
     }
 
     public void deleteSave(String name) {
-        // TODO: implementar
+        try {
+            Statement statement = connection.createStatement();
+            String sql = String.format("DELETE FROM Aliases WHERE Name = \"%s\";", name);
+            statement.executeUpdate(sql);
+            statement.close();
+            connection.commit();
+        } catch (Exception e) {
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
+        }
     }
 
     public void saveAlias(SaveData data) {
@@ -97,8 +105,6 @@ public class SavesManager {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
         }
     }
-
-    // TODO: fix sql vulnerabilities
 
     public SaveData loadAlias(String name) {
         try {

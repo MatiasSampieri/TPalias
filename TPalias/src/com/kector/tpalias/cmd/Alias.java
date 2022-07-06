@@ -92,6 +92,30 @@ public class Alias implements CommandExecutor {
             return true;
         }
 
+        if (command.getName().equalsIgnoreCase("del")) {
+            if (args.length != 1) {
+                player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /del <nombre>");
+                return true;
+            }
+
+            // check if player is owner of alias
+            String argument = args[0];
+            SaveData savedata = saveman.loadAlias(argument);
+
+            if (savedata == null) {
+                player.sendMessage(ChatColor.RED + "[ERROR: alias o jugador inexistente]");
+                return true;
+            }
+
+            if (savedata.getPlayer() != player) {
+                player.sendMessage(ChatColor.RED + "Solo el jugador que creo el alias puede eliminarlo!");
+                return true;
+            }
+
+            saveman.deleteSave(argument);
+            player.sendMessage(ChatColor.GOLD + "Se borro el alias " + argument);
+            return true;
+        }
         return true;
     }
 

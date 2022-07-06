@@ -4,6 +4,7 @@ import com.kector.tpalias.cmd.Alias;
 import com.kector.tpalias.cmd.Quick;
 import com.kector.tpalias.cmd.Tpa;
 import com.kector.tpalias.events.BackFromTheGrave;
+import com.kector.tpalias.otr.AliasTab;
 import com.kector.tpalias.otr.SaveData;
 import com.kector.tpalias.otr.SavesManager;
 import org.bukkit.ChatColor;
@@ -21,13 +22,18 @@ public class TPalias extends JavaPlugin {
         Server server = getServer();
         this.saveman = new SavesManager(server);
 
+
         Tpa tpa = new Tpa(server, saveman);
+        AliasTab aliasTab = new AliasTab(saveman);
         Alias alias = new Alias(server, saveman);
         Quick quick = new Quick(server, saveman);
+
         Objects.requireNonNull(getCommand("t")).setExecutor(tpa);
+        Objects.requireNonNull(getCommand("t")).setTabCompleter(aliasTab);
 
         Objects.requireNonNull(getCommand("alias")).setExecutor(alias);
         Objects.requireNonNull(getCommand("lista")).setExecutor(alias);
+        Objects.requireNonNull(getCommand("del")).setExecutor(alias);
 
         Objects.requireNonNull(getCommand("quick")).setExecutor(quick);
         Objects.requireNonNull(getCommand("back")).setExecutor(quick);

@@ -63,7 +63,7 @@ public class Tpa implements CommandExecutor {
             // check if argument is an alias
             SaveData savedata = saveman.loadAlias(argument);
             if (savedata == null) {
-                player.sendMessage(ChatColor.RED + "[ERROR: alias o jugador inexistente] \nusa /list para ver la lista de aliases");
+                player.sendMessage(ChatColor.RED + "[ERROR: alias inexistente] \nusa /list para ver la lista de aliases");
                 return true;
             }
 
@@ -72,8 +72,6 @@ public class Tpa implements CommandExecutor {
             player.teleport(savedata.getLocation());
             player.sendMessage(ChatColor.AQUA + "Tepeado a " + savedata.getName());
         }
-
-
 
         return true;
     }
