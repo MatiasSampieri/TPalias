@@ -3,7 +3,6 @@ package com.kector.tpalias.cmd;
 import com.kector.tpalias.otr.SaveData;
 import com.kector.tpalias.otr.SavesManager;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -30,6 +29,7 @@ public class Alias implements CommandExecutor {
 
         // /alias
         if (command.getName().equalsIgnoreCase("alias")) {
+
             if (args.length != 1) {
                 player.sendMessage(ChatColor.RED + "[ERROR: cantidad de argumentos] /alias <nombre>");
                 return true;

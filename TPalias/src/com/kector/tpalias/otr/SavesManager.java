@@ -8,23 +8,25 @@ import org.bukkit.entity.Player;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SavesManager {
 
     private final Server server;
     private final Connection connection;
+    private static final String DB_NAME = "saves.db";
 
     public SavesManager(Server server) {
         this.server = server;
-        this.connection = initDB("aliases.db");
+        this.connection = initDB();
     }
 
     public Location loadQuick(Player player) {
         String name = player.getDisplayName();
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT * FROM QuickSaves WHERE Player = \"%s\"", name);
+            String sql = String.format("SELECT * FROM \"QuickSaves\" WHERE Player = \"%s\"", name);
             ResultSet res = statement.executeQuery(sql);
 
             if (!res.next()) {
@@ -52,6 +54,7 @@ public class SavesManager {
     }
 
     public void saveQuick(Player player) {
+
         String name = player.getDisplayName();
         double x = player.getLocation().getX();
         double y = player.getLocation().getY();
@@ -62,20 +65,20 @@ public class SavesManager {
 
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("INSERT OR REPLACE INTO QuickSaves (Player, X, Y, Z, yaw, pitch, Dim) " +
+            String sql = String.format("INSERT OR REPLACE INTO \"QuickSaves\" (Player, X, Y, Z, yaw, pitch, Dim) " +
                     "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\");", name, x, y, z, yaw, pitch, dim);
             statement.executeUpdate(sql);
             statement.close();
             connection.commit();
         } catch (Exception e) {
-            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
         }
     }
 
     public void deleteSave(String name) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("DELETE FROM Aliases WHERE Name = \"%s\";", name);
+            String sql = String.format("DELETE FROM \"Aliases\" WHERE Name = \"%s\";", name);
             statement.executeUpdate(sql);
             statement.close();
             connection.commit();
@@ -96,7 +99,7 @@ public class SavesManager {
 
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("INSERT INTO Aliases (Name, X, Y, Z, yaw, pitch, Dim, Player) " +
+            String sql = String.format("INSERT INTO \"Aliases\" (Name, X, Y, Z, yaw, pitch, Dim, Player) " +
                                        "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\", \"%s\");", name, x, y, z, yaw, pitch, dim, player);
             statement.executeUpdate(sql);
             statement.close();
@@ -109,7 +112,7 @@ public class SavesManager {
     public SaveData loadAlias(String name) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT * FROM Aliases WHERE Name = \"%s\"", name);
+            String sql = String.format("SELECT * FROM \"Aliases\" WHERE Name = \"%s\"", name);
             ResultSet res = statement.executeQuery(sql);
 
             if (!res.next()) {
@@ -164,7 +167,7 @@ public class SavesManager {
     public List<String> getList(String player) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM Aliases WHERE Player = \"%s\"", player);
+            String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Player = \"%s\"", player);
             ResultSet res = statement.executeQuery(sql);
 
             List<String> aliasList = new ArrayList<>();
@@ -186,7 +189,7 @@ public class SavesManager {
     public List<String> getList(World dim) {
         try {
             Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM Aliases WHERE Dim = \"%s\"", dim.getName());
+            String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Dim = \"%s\"", dim.getName());
             ResultSet res = statement.executeQuery(sql);
 
             List<String> aliasList = new ArrayList<>();
@@ -210,14 +213,15 @@ public class SavesManager {
             connection.commit();
             connection.close();
         } catch (Exception e) {
-
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
         }
     }
 
-    private Connection initDB(String name) {
+    private Connection initDB() {
         try {
             Class.forName("org.sqlite.JDBC");
-            Connection con = DriverManager.getConnection("jdbc:sqlite:" + name);
+            Connection con = DriverManager.getConnection("jdbc:sqlite:" + DB_NAME);
+
             con.setAutoCommit(false);
             server.getConsoleSender().sendMessage(ChatColor.GREEN + "[TPalias] DB abierta!");
 
@@ -238,18 +242,19 @@ public class SavesManager {
             statement.executeUpdate(sql);
 
             sql = "CREATE TABLE IF NOT EXISTS \"QuickSaves\" (" +
-                    "\"Player\"TEXT NOT NULL UNIQUE," +
-                    "\"X\"REAL," +
-                    "\"Y\"REAL," +
-                    "\"Z\"REAL," +
+                    "\"Player\" TEXT NOT NULL UNIQUE," +
+                    "\"X\" REAL," +
+                    "\"Y\" REAL," +
+                    "\"Z\" REAL," +
                     "\"yaw\" REAL," +
                     "\"pitch\" REAL," +
-                    "\"Dim\"TEXT," +
+                    "\"Dim\" TEXT," +
                     "PRIMARY KEY(\"Player\"));";
 
             statement.executeUpdate(sql);
             statement.close();
             con.commit();
+
             return con;
 
         } catch ( Exception e ) {

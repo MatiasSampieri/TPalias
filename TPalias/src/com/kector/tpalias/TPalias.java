@@ -5,7 +5,6 @@ import com.kector.tpalias.cmd.Quick;
 import com.kector.tpalias.cmd.Tpa;
 import com.kector.tpalias.events.BackFromTheGrave;
 import com.kector.tpalias.otr.AliasTab;
-import com.kector.tpalias.otr.SaveData;
 import com.kector.tpalias.otr.SavesManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -21,7 +20,6 @@ public class TPalias extends JavaPlugin {
     public void onEnable() {
         Server server = getServer();
         this.saveman = new SavesManager(server);
-
 
         Tpa tpa = new Tpa(server, saveman);
         AliasTab aliasTab = new AliasTab(saveman);
