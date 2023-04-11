@@ -20,7 +20,7 @@ public class AliasTab implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
         if (args.length == 1) {
-            List<String> aliasList = saveman.getList();
+            List<String> aliasList = saveman.onlyNames(saveman.getList());
             List<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
 
             for (Player player : playerList) {

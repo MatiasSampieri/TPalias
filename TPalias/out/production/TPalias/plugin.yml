@@ -17,7 +17,7 @@ commands:
   lista:
     description: lista todos los aliases de coordenadas guardados
     usage: /<comando> <jugador o dimension>
-    aliases: [l, lis]
+    aliases: [l, lis, ls]
 
   quick:
     description: hacer una quicksave
@@ -33,3 +33,18 @@ commands:
     description: borrar alias
     usage: /<command> <alias>
     aliases: [d, rm]
+
+  top:
+    description: mostrar lugares mas visitados
+    usage: /<command>
+    aliases: [ranking]
+
+  fav:
+    description: mostrar favoritos o marcar lugar como favorito
+    usage: /<command> <nombre>
+    aliases: [f]
+
+  defav:
+    description: sacar un alias de favorito
+    usage: /<command> <nombre>
+    aliases: [df]

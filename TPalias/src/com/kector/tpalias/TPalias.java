@@ -32,6 +32,9 @@ public class TPalias extends JavaPlugin {
         Objects.requireNonNull(getCommand("alias")).setExecutor(alias);
         Objects.requireNonNull(getCommand("lista")).setExecutor(alias);
         Objects.requireNonNull(getCommand("del")).setExecutor(alias);
+        Objects.requireNonNull(getCommand("top")).setExecutor(alias);
+        Objects.requireNonNull(getCommand("fav")).setExecutor(alias);
+        Objects.requireNonNull(getCommand("defav")).setExecutor(alias);
 
         Objects.requireNonNull(getCommand("quick")).setExecutor(quick);
         Objects.requireNonNull(getCommand("back")).setExecutor(quick);

@@ -7,9 +7,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
 
 public class SavesManager {
 
@@ -25,9 +24,14 @@ public class SavesManager {
     public Location loadQuick(Player player) {
         String name = player.getDisplayName();
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("SELECT * FROM \"QuickSaves\" WHERE Player = \"%s\"", name);
-            ResultSet res = statement.executeQuery(sql);
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("SELECT * FROM \"QuickSaves\" WHERE Player = \"%s\"", name);
+            //ResultSet res = statement.executeQuery(sql);
+
+            String sqlstr = "SELECT * FROM \"QuickSaves\" WHERE Player = ?";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, name);
+            ResultSet res = stmt.executeQuery();
 
             if (!res.next()) {
                 server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al cargar quick save");
@@ -37,12 +41,12 @@ public class SavesManager {
             double x = res.getDouble("X");
             double y = res.getDouble("Y");
             double z = res.getDouble("Z");
-            float yaw = res.getFloat("yaw");
-            float pitch = res.getFloat("pitch");
+            float yaw = res.getFloat("Yaw");
+            float pitch = res.getFloat("Pitch");
             String dim = res.getString("Dim");
 
             res.close();
-            statement.close();
+            stmt.close();
 
             return new Location(server.getWorld(dim), x, y, z, yaw, pitch);
 
@@ -53,9 +57,36 @@ public class SavesManager {
         }
     }
 
+    public List<ListItem> getTop(){
+        try {
+            Statement statement = connection.createStatement();
+            String sql = "SELECT Name, Count, Dim FROM Aliases ORDER BY Count DESC";
+            ResultSet res = statement.executeQuery(sql);
+
+            List<ListItem> aliasList = new ArrayList<>();
+
+            while (res.next()) {
+                ListItem item = new ListItem(
+                        res.getString("Name"),
+                        res.getString("Dim"),
+                        res.getInt("Count")
+                    );
+                aliasList.add(item);
+            }
+
+            res.close();
+            statement.close();
+
+            return aliasList;
+
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
     public void saveQuick(Player player) {
 
-        String name = player.getDisplayName();
+        String ply = player.getDisplayName();
         double x = player.getLocation().getX();
         double y = player.getLocation().getY();
         double z = player.getLocation().getZ();
@@ -64,11 +95,24 @@ public class SavesManager {
         String dim = player.getLocation().getWorld().getName();
 
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("INSERT OR REPLACE INTO \"QuickSaves\" (Player, X, Y, Z, yaw, pitch, Dim) " +
-                    "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\");", name, x, y, z, yaw, pitch, dim);
-            statement.executeUpdate(sql);
-            statement.close();
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("INSERT OR REPLACE INTO \"QuickSaves\" (Player, X, Y, Z, Yaw, Pitch, Dim) " +
+            //        "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\");", name, x, y, z, yaw, pitch, dim);
+
+            String sqlstr = "INSERT OR REPLACE INTO \"QuickSaves\" (Player, X, Y, Z, Yaw, Pitch, Dim) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, ply);
+            stmt.setDouble(2, x);
+            stmt.setDouble(3, y);
+            stmt.setDouble(4, z);
+            stmt.setFloat(5, yaw);
+            stmt.setFloat(6, pitch);
+            stmt.setString(7, dim);
+
+            stmt.executeUpdate();
+            stmt.close();
             connection.commit();
         } catch (Exception e) {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
@@ -77,10 +121,14 @@ public class SavesManager {
 
     public void deleteSave(String name) {
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("DELETE FROM \"Aliases\" WHERE Name = \"%s\";", name);
-            statement.executeUpdate(sql);
-            statement.close();
+            //Statement statement = connection.createStatement();
+
+            String sqlstr = "DELETE FROM \"Aliases\" WHERE Name = ?;";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+
+            stmt.setString(1, name);
+            stmt.executeUpdate();
+            stmt.close();
             connection.commit();
         } catch (Exception e) {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
@@ -98,22 +146,85 @@ public class SavesManager {
         String dim = data.getLocation().getWorld().getName();
 
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("INSERT INTO \"Aliases\" (Name, X, Y, Z, yaw, pitch, Dim, Player) " +
-                                       "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\", \"%s\");", name, x, y, z, yaw, pitch, dim, player);
-            statement.executeUpdate(sql);
-            statement.close();
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("INSERT INTO \"Aliases\" (Name, X, Y, Z, Yaw, Pitch, Dim, Player) " +
+            //                           "VALUES (\"%s\", %f, %f, %f, %f, %f, \"%s\", \"%s\");", name, x, y, z, yaw, pitch, dim, player);
+
+            String sqlstr = "INSERT INTO \"Aliases\" (Name, X, Y, Z, Yaw, Pitch, Dim, Player, Count, Fav, Priv) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)";
+
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, name);
+            stmt.setDouble(2, x);
+            stmt.setDouble(3, y);
+            stmt.setDouble(4, z);
+            stmt.setFloat(5, yaw);
+            stmt.setFloat(6, pitch);
+            stmt.setString(7, dim);
+            stmt.setString(8, player);
+
+            stmt.executeUpdate();
+            stmt.close();
             connection.commit();
         } catch (Exception e) {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
         }
     }
 
+    public int setFav(String name, boolean fav) {
+        try {
+            String sqlstr = "UPDATE \"Aliases\" SET Fav = ? WHERE Name = ?;";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+
+            stmt.setString(2, name);
+            stmt.setInt(1, (fav ? 1 : 0));
+            int rows = stmt.executeUpdate();
+            stmt.close();
+            connection.commit();
+
+            return rows;
+        } catch (Exception e) {
+            server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
+            return 0;
+        }
+    }
+
+    public List<ListItem> getFavs() {
+        try {
+            String sqlstr = "SELECT Name, Dim, Count FROM \"Aliases\" WHERE Fav = 1";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            ResultSet res = stmt.executeQuery();
+
+            List<ListItem> aliasList = new ArrayList<>();
+
+            while (res.next()) {
+                aliasList.add(new ListItem(
+                        res.getString("Name"),
+                        res.getString("Dim"),
+                        res.getInt("Count")
+                ));
+            }
+
+            res.close();
+            stmt.close();
+
+            return aliasList;
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public SaveData loadAlias(String name) {
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("SELECT * FROM \"Aliases\" WHERE Name = \"%s\"", name);
-            ResultSet res = statement.executeQuery(sql);
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("SELECT * FROM \"Aliases\" WHERE Name = \"%s\"", name);
+            //ResultSet res = statement.executeQuery(sql);
+
+            String sqlstr = "SELECT * FROM \"Aliases\" WHERE Name = ?";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, name);
+            ResultSet res = stmt.executeQuery();
 
             if (!res.next()) {
                 server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR al encontrar alias");
@@ -124,12 +235,20 @@ public class SavesManager {
             double x = res.getDouble("X");
             double y = res.getDouble("Y");
             double z = res.getDouble("Z");
-            float yaw = res.getFloat("yaw");
-            float pitch = res.getFloat("pitch");
+            float yaw = res.getFloat("Yaw");
+            float pitch = res.getFloat("Pitch");
             String player = res.getString("Player");
+            int count = res.getInt("Count");
 
             res.close();
-            statement.close();
+            stmt.close();
+
+            String updtstr = "UPDATE \"Aliases\" SET Count = ? WHERE Name = ?";
+            PreparedStatement updatestmt = connection.prepareStatement(updtstr);
+            updatestmt.setString(2, name);
+            updatestmt.setInt(1, count + 1);
+            updatestmt.executeUpdate();
+            updatestmt.close();
 
             Location location = new Location(server.getWorld(dim), x, y, z, yaw, pitch);
 
@@ -142,16 +261,20 @@ public class SavesManager {
         }
     }
 
-    public List<String> getList() {
+    public List<ListItem> getList() {
         try {
             Statement statement = connection.createStatement();
-            String sql = "SELECT Name FROM Aliases";
+            String sql = "SELECT Name, Dim, Count FROM Aliases";
             ResultSet res = statement.executeQuery(sql);
 
-            List<String> aliasList = new ArrayList<>();
+            List<ListItem> aliasList = new ArrayList<>();
 
             while (res.next()) {
-                aliasList.add(res.getString("Name"));
+                aliasList.add(new ListItem(
+                    res.getString("Name"),
+                    res.getString("Dim"),
+                    res.getInt("Count")
+                ));
             }
 
             res.close();
@@ -164,20 +287,28 @@ public class SavesManager {
         }
     }
 
-    public List<String> getList(String player) {
+    public List<ListItem> getList(String player) {
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Player = \"%s\"", player);
-            ResultSet res = statement.executeQuery(sql);
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Player = \"%s\"", player);
+            //ResultSet res = statement.executeQuery(sql);
+            String sqlstr = "SELECT Name, Dim, Count FROM \"Aliases\" WHERE Player = ?";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, player);
+            ResultSet res = stmt.executeQuery();
 
-            List<String> aliasList = new ArrayList<>();
+            List<ListItem> aliasList = new ArrayList<>();
 
             while (res.next()) {
-                aliasList.add(res.getString("Name"));
+                aliasList.add(new ListItem(
+                    res.getString("Name"),
+                    res.getString("Dim"),
+                    res.getInt("Count")
+                ));
             }
 
             res.close();
-            statement.close();
+            stmt.close();
 
             return aliasList;
 
@@ -186,20 +317,29 @@ public class SavesManager {
         }
     }
 
-    public List<String> getList(World dim) {
+    public List<ListItem> getList(World dim) {
         try {
-            Statement statement = connection.createStatement();
-            String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Dim = \"%s\"", dim.getName());
-            ResultSet res = statement.executeQuery(sql);
+            //Statement statement = connection.createStatement();
+            //String sql = String.format("SELECT Name FROM \"Aliases\" WHERE Dim = \"%s\"", dim.getName());
+            //ResultSet res = statement.executeQuery(sql);
 
-            List<String> aliasList = new ArrayList<>();
+            String sqlstr = "SELECT Name, Dim, Count FROM \"Aliases\" WHERE Dim = ?";
+            PreparedStatement stmt = connection.prepareStatement(sqlstr);
+            stmt.setString(1, dim.getName());
+            ResultSet res = stmt.executeQuery();
+
+            List<ListItem> aliasList = new ArrayList<>();
 
             while (res.next()) {
-                aliasList.add(res.getString("Name"));
+                aliasList.add(new ListItem(
+                    res.getString("Name"),
+                    res.getString("Dim"),
+                    res.getInt("Count")
+                ));
             }
 
             res.close();
-            statement.close();
+            stmt.close();
 
             return aliasList;
 
@@ -233,10 +373,13 @@ public class SavesManager {
                     "\"X\" REAL," +
                     "\"Y\" REAL," +
                     "\"Z\" REAL," +
-                    "\"yaw\" REAL," +
-                    "\"pitch\" REAL," +
+                    "\"Yaw\" REAL," +
+                    "\"Pitch\" REAL," +
                     "\"Dim\" TEXT," +
                     "\"Player\" TEXT," +
+                    "\"Count\" INTEGER," +
+                    "\"Fav\" INTEGER," +
+                    "\"Priv\" INTEGER," +
                     "PRIMARY KEY(\"ID\" AUTOINCREMENT));";
 
             statement.executeUpdate(sql);
@@ -246,8 +389,8 @@ public class SavesManager {
                     "\"X\" REAL," +
                     "\"Y\" REAL," +
                     "\"Z\" REAL," +
-                    "\"yaw\" REAL," +
-                    "\"pitch\" REAL," +
+                    "\"Yaw\" REAL," +
+                    "\"Pitch\" REAL," +
                     "\"Dim\" TEXT," +
                     "PRIMARY KEY(\"Player\"));";
 
@@ -262,5 +405,13 @@ public class SavesManager {
             server.getConsoleSender().sendMessage(ChatColor.RED + "[TPalias] ERROR: " + e.getClass().getName() + " " + e.getMessage());
             return null;
         }
+    }
+
+    public List<String> onlyNames(List<ListItem> list) {
+        List<String> stringList = new ArrayList<>();
+        for (ListItem item : list) {
+            stringList.add(item.name);
+        }
+        return stringList;
     }
 }

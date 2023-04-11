@@ -1,0 +1,50 @@
+name: TPalias
+version: 1.0
+author: kector
+main: com.kector.tpalias.TPalias
+api-version: 1.19
+commands:
+  t:
+    description: tepea a jugador o alias
+    usage: /<comando> <jugador o alias>
+    aliases: [go, ir, tpa]
+
+  alias:
+    description: guarda la posicion actual con un nombre
+    usage: /<comando> <nombre>
+    aliases: [a, save, wp]
+
+  lista:
+    description: lista todos los aliases de coordenadas guardados
+    usage: /<comando> <jugador o dimension>
+    aliases: [l, lis, ls]
+
+  quick:
+    description: hacer una quicksave
+    usage: /<comando>
+    aliases: [qs, q]
+
+  back:
+    description: volver
+    usage: /<command>
+    aliases: [b, volver, ret]
+
+  del:
+    description: borrar alias
+    usage: /<command> <alias>
+    aliases: [d, rm]
+
+  top:
+    description: mostrar lugares mas visitados
+    usage: /<command>
+    aliases: [ranking]
+
+  fav:
+    description: mostrar favoritos o marcar lugar como favorito
+    usage: /<command> <nombre>
+    aliases: [f]
+
+  defav:
+    description: sacar un alias de favorito
+    usage: /<command> <nombre>
+    aliases: [df]
